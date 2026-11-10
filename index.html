@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<style>
+:root{color-scheme:dark;--bg:#0b0d12;--panel:#12151c;--panel2:#181c25;--line:#252a35;--text:#e9e9ec;--mut:#8d92a0;--gold:#d9b25f;--gold2:#f0d28c;--ok:#4cc38a;--bad:#ef6b6b;--warn:#e7b04a;--r:14px}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.5 Inter,"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+a{color:var(--gold2)}
+header{display:flex;align-items:center;gap:18px;padding:10px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#10131a,#0b0d12);position:sticky;top:0;z-index:5}
+.logo{font-weight:800;letter-spacing:.32em;font-size:19px;color:var(--gold2)}
+.logo span{color:var(--gold);font-weight:400;letter-spacing:.1em;font-size:12px;margin-left:6px}
+nav{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+nav button{background:none;border:0;color:var(--mut);padding:6px 14px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on{background:var(--panel2);color:var(--text)}
+.sp{flex:1}.who{color:var(--mut);font-size:13px}
+main{height:calc(100% - 55px)}
+.view{display:none;height:100%}.view.on{display:flex}
+/* chat */
+#ist{width:270px;border-right:1px solid var(--line);overflow:auto;padding:12px;background:#0d1016}
+#ist h4{margin:6px 4px 10px;color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+#ist .it{padding:8px 10px;border-radius:9px;cursor:pointer;font-size:13px;color:#cfd2da;margin-bottom:2px}
+#ist .it:hover,#ist .it.on{background:var(--panel2)}
+#ist .it small{display:block;color:var(--mut);font-size:11px}
+.nou{width:100%;margin-bottom:10px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:8px;cursor:pointer;font:inherit}
+#chat{flex:1;display:flex;flex-direction:column;min-width:0}
+#msgs{flex:1;overflow:auto;padding:22px 6% 10px}
+.m{max-width:900px;margin:0 auto 16px}
+.u .b{background:#1d2230;border:1px solid #2a3142;border-radius:var(--r);padding:10px 14px;margin-left:auto;width:fit-content;max-width:85%;white-space:pre-wrap}
+.a .b{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;overflow-x:auto}
+.a .b table{border-collapse:collapse;margin:8px 0;font-size:13.5px}
+.a .b th,.a .b td{border:1px solid var(--line);padding:5px 9px;text-align:center;vertical-align:middle}
+.a .b th{background:var(--panel2)}
+.a .b code{background:#0e1117;padding:1px 5px;border-radius:5px}
+.a .b pre{background:#0e1117;padding:10px;border-radius:9px;overflow:auto}
+.act{max-width:900px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:#0f1218}
+.stare{max-width:900px;margin:0 auto 14px;color:var(--gold);font-size:13px;display:none}
+.stare.on{display:block}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-right:7px;animation:p 1.2s infinite}
+@keyframes p{50%{opacity:.25}}
+#comp{border-top:1px solid var(--line);padding:12px 6% 16px;background:#0d1016}
+#comp .in{max-width:900px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+textarea{flex:1;resize:none;min-height:46px;max-height:220px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit}
+textarea:focus{outline:1px solid var(--gold)}
+.btn{background:var(--gold);color:#1a1405;border:0;border-radius:11px;padding:12px 18px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}
+.btn.sec{background:var(--panel2);color:var(--text);border:1px solid var(--line);font-weight:500}
+.btn:disabled{opacity:.45;cursor:default}
+.hint{max-width:900px;margin:6px auto 0;color:var(--mut);font-size:12px}
+.gol{max-width:700px;margin:12vh auto 0;text-align:center;color:var(--mut)}
+.gol .z{font-size:46px;letter-spacing:.4em;color:var(--gold2);font-weight:800;margin-bottom:6px}
+.err{color:var(--bad)}
+/* dashboard */
+#dash{flex-direction:column;overflow:auto;padding:18px 3% 30px}
+.dtop{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column}
+.card .pal{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold)}
+.card h3{margin:2px 0 8px;font-size:15px;font-weight:600}
+.card .v{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.card .e{color:var(--mut);font-size:13px;margin-bottom:8px}
+.card table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+.card td{border-top:1px solid var(--line);padding:5px 4px;vertical-align:middle}
+.card td:first-child{color:var(--mut);width:44%}
+.card .src{margin-top:auto;padding-top:10px;font-size:11.5px;color:var(--mut)}
+.card .def{font-size:11.5px;color:var(--mut);margin-top:6px;font-style:italic}
+.card.bad{border-color:#5a2a2a}.card.bad .v{color:var(--bad);font-size:15px}
+@media (max-width:760px){#ist{display:none}#ist.show{display:block;position:absolute;z-index:9;height:calc(100% - 55px)}#msgs{padding:16px 16px 8px}#comp{padding:10px 16px 14px}.who{display:none}header{gap:10px;padding:10px 16px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" integrity="sha384-/TQbtLCAerC3jgaim+N78RZSDYV7ryeoBCVqTuzRrFec2akfBkHS7ACQ3PQhvMVi" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a" crossorigin="anonymous"></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+<title>ZEUS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+<header>
+  <div class="logo">ZEUS<span>TEG</span></div>
+  <nav><button id="tChat" class="on" onclick="arata('chat')">Chat</button><button id="tDash" onclick="arata('dash')">Dashboard</button></nav>
+  <div class="sp"></div>
+  <button class="btn sec" id="bIst" style="padding:6px 10px;display:none" onclick="document.getElementById('ist').classList.toggle('show')">Istoric</button>
+  <div class="who"><span id="cine">…</span> · <a href="#" onclick="iesire();return false" style="color:#8d92a0">schimbă contul</a> · <span id="costTop">…</span></div>
+</header>
+<div id="login" style="position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;align-items:center;justify-content:center">
+  <div style="text-align:center;padding:16px"><div style="font-size:46px;letter-spacing:.4em;color:var(--gold2);font-weight:800">ZEUS</div>
+  <p style="color:var(--mut)">Platforma internă TEG. Intră cu contul tău teg.ro.</p><div id="gbtn" style="display:flex;justify-content:center;margin:18px 0"></div>
+  <p id="loginErr" class="err"></p></div></div>
+<main>
+  <section class="view on" id="vChat">
+    <aside id="ist"><button class="nou" onclick="conversatieNoua()">+ Conversație nouă</button><h4>Istoricul tău</h4><div id="istL"><div class="it"><small>se încarcă…</small></div></div></aside>
+    <div id="chat">
+      <div id="msgs"><div class="gol" id="gol"><div class="z">ZEUS</div><div>Întreabă orice despre TEG: cash flow, plăți, contracte, procese, oportunități, bugete, artiști, vânzări, memoria proiectului. ZEUS citește sursele acum, calculează și îți dă sursa și ora fiecărei cifre.</div></div></div>
+      <div class="stare" id="stare"><span class="dot"></span><span id="stareT">ZEUS lucrează…</span></div>
+      <div id="comp"><div class="in">
+        <textarea id="q" placeholder="Ex.: Cât avem de plătit în următoarele 14 zile?" rows="1"></textarea>
+        <button class="btn sec" id="bStop" style="display:none" onclick="opreste()">Oprește</button>
+        <button class="btn" id="bSend" onclick="trimite()">Trimite</button>
+      </div><div class="hint">Enter trimite · Shift+Enter rând nou · doar citire: ZEUS nu modifică nimic în foi.</div></div>
+    </div>
+  </section>
+  <section class="view" id="dash">
+    <div class="dtop"><button class="btn sec" id="bRef" onclick="incarcaDash(true)">Reîmprospătează</button><span id="dGen">…</span></div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+<script>
+var S={sid:null,cursor:null,vazut:{},merge:false,err:0,blocA:null,act:null};
+var CFG={api:'https://script.google.com/macros/s/AKfycbwrjVY7opzwp07GXBgod5sR86RlankdlcPP_-CicjmkoPo962Y9XeYqeWbhgEUqd1gt/exec',client:'__CLIENT_ID__'};
+var PAG=(location.hash||'').indexOf('dashboard')>=0?'dashboard':'chat';
+var SES=null; try{SES=localStorage.getItem('zeus_ses');}catch(e){}
+DOMPurify.addHook('afterSanitizeAttributes',function(n){if(n.tagName==='A'){n.setAttribute('target','_blank');n.setAttribute('rel','noopener');}});
+function md(t){return DOMPurify.sanitize(marked.parse(t||''));}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function $(i){return document.getElementById(i);}
+function arata(v){$('vChat').classList.toggle('on',v==='chat');$('dash').classList.toggle('on',v==='dash');$('tChat').classList.toggle('on',v==='chat');$('tDash').classList.toggle('on',v==='dash');if(v==='dash'&&!$('grid').children.length)incarcaDash(false);}
+var ACT={apiTrimite:'trimite',apiProgres:'progres',apiIstoric:'istoric',apiDeschide:'deschide',apiOpreste:'opreste',apiDashboard:'dashboard',apiCost:'cost'};
+function post(o){return fetch(CFG.api,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json();});}
+function run(fn,args,ok,ko){ko=ko||function(e){eroare(e);};post({act:ACT[fn],args:args||[],sesiune:SES}).then(function(j){if(j.ok)ok(j.rez);else{if(/SESIUNE/.test(j.eroare)){iesire();}ko(new Error(j.eroare));}}).catch(ko);}
+function intrat(nume){document.getElementById('login').style.display='none';document.getElementById('cine').textContent=nume;incarcaIstoric();incarcaCost();if(PAG==='dashboard')arata('dash');}
+function onGoogle(r){document.getElementById('loginErr').textContent='Verific contul…';post({act:'login',idToken:r.credential}).then(function(j){if(!j.ok){document.getElementById('loginErr').textContent=j.eroare;return;}SES=j.sesiune;try{localStorage.setItem('zeus_ses',SES);}catch(e){}document.getElementById('loginErr').textContent='';intrat(j.utilizator);}).catch(function(e){document.getElementById('loginErr').textContent='Eroare: '+e;});}
+function iesire(){SES=null;try{localStorage.removeItem('zeus_ses');}catch(e){}document.getElementById('login').style.display='flex';try{google.accounts.id.disableAutoSelect();}catch(e){}}
+function initGoogle(){if(!window.google||!google.accounts){return setTimeout(initGoogle,200);}google.accounts.id.initialize({client_id:CFG.client,callback:onGoogle,ux_mode:'popup',hd:'teg.ro',auto_select:false,cancel_on_tap_outside:false});google.accounts.id.renderButton(document.getElementById('gbtn'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'ro'});}
+function eroare(e){var m=String(e&&e.message||e);adauga('a','<span class="err">Eroare: '+esc(m)+'</span>',true);gata();}
+function adauga(cine,html,brut){$('gol')&&$('gol').remove();var d=document.createElement('div');d.className='m '+cine;var b=document.createElement('div');b.className='b';if(brut)b.innerHTML=html;else if(cine==='u')b.textContent=html;else b.innerHTML=md(html);d.appendChild(b);$('msgs').appendChild(d);$('msgs').scrollTop=1e9;return b;}
+function activitate(t){if(!S.act){S.act=document.createElement('div');S.act.className='act';$('msgs').appendChild(S.act);}var c=document.createElement('span');c.className='chip';c.textContent=t;S.act.appendChild(c);$('msgs').scrollTop=1e9;}
+var NUME_U={citeste_foaie:'citește foaia',structura_sursa:'structura',cauta_drive:'caută în Drive',lista_folder:'listează folderul',citeste_fisier:'citește fișierul',memorie:'memoria',web_search:'caută pe internet',web_fetch:'citește pagina',bash:'calculează',read:'citește',grep:'caută',glob:'caută fișiere',write:'scrie în sandbox'};
+function curataPrefix(t){return String(t||'').replace(/^\[[^\]]{3,80}\]\n/,'');}
+function randare(evs){evs.forEach(function(e){if(S.vazut[e.id])return;S.vazut[e.id]=1;if(e.la)S.cursor=e.la;
+  if(e.t==='user.message'){S.act=null;adauga('u',curataPrefix(e.text));}
+  else if(e.t==='agent.message'){if(e.text&&e.text.trim()){adauga('a',e.text);S.act=null;}}
+  else if(e.t==='agent.custom_tool_use'||e.t==='agent.tool_use'){activitate((NUME_U[e.unealta]||e.unealta)+(e.intrare?' · '+e.intrare:''));$('stareT').textContent='ZEUS: '+(NUME_U[e.unealta]||e.unealta)+(e.intrare?' · '+e.intrare:'')+'…';}
+  else if(e.t==='agent.thinking'){$('stareT').textContent='ZEUS gândește…';}
+  else if(e.t==='session.error'){adauga('a','<span class="err">Eroare de sesiune: '+esc(e.text)+'</span>',true);}
+  else if(e.t==='session.status_idle'&&e.motiv==='budget_reached'){adauga('a','<span class="err">Conversația a atins plafonul tehnic de cost (8 $). Pornește o conversație nouă.</span>',true);}
+});}
+function lucreaza(on){S.merge=on;$('stare').classList.toggle('on',on);$('bSend').disabled=on;$('bStop').style.display=on?'':'none';if(on)$('stareT').textContent='ZEUS citește sursele…';}
+function gata(){lucreaza(false);incarcaIstoric();incarcaCost();}
+function trimite(){var t=$('q').value.trim();if(!t||S.merge)return;$('q').value='';auto();adauga('u',t);lucreaza(true);
+  run('apiTrimite',[S.sid,t],function(r){if(!S.sid){S.sid=r.sid;}S.err=0;setTimeout(sondaj,2500);},function(e){eroare(e);});}
+function sondaj(){if(!S.sid||!S.merge)return;run('apiProgres',[S.sid,S.cursor],function(r){S.err=0;randare(r.evenimente||[]);
+    if(r.gata){gata();if(r.cost!=null)activitate('cost conversație: '+Number(r.cost).toFixed(2)+' $');}else setTimeout(sondaj,2500);},
+  function(e){S.err++;if(S.err>6){eroare(e);}else setTimeout(sondaj,4000);});}
+function opreste(){if(S.sid)run('apiOpreste',[S.sid],function(){});}
+function conversatieNoua(){S={sid:null,cursor:null,vazut:{},merge:false,err:0,act:null};$('msgs').innerHTML='';adauga('a','Conversație nouă. Ce vrei să afli?');document.querySelectorAll('#istL .it').forEach(function(x){x.classList.remove('on');});$('ist').classList.remove('show');}
+function deschide(sid,el){if(S.merge)return;S={sid:sid,cursor:null,vazut:{},merge:false,err:0,act:null};$('msgs').innerHTML='<div class="m a"><div class="b">Se încarcă…</div></div>';
+  document.querySelectorAll('#istL .it').forEach(function(x){x.classList.remove('on');});if(el)el.classList.add('on');$('ist').classList.remove('show');
+  run('apiDeschide',[sid],function(r){$('msgs').innerHTML='';randare(r.evenimente||[]);});}
+function incarcaIstoric(){run('apiIstoric',[],function(l){var h='';if(!l.length)h='<div class="it"><small>încă nimic</small></div>';l.forEach(function(x){h+='<div class="it'+(x.sid===S.sid?' on':'')+'" onclick="deschide(\''+x.sid+'\',this)">'+esc(x.titlu)+'<small>'+esc(x.la)+(x.cost?' · '+Number(x.cost.usd).toFixed(2)+' $':'')+'</small></div>';});$('istL').innerHTML=h;},function(){});}
+function incarcaCost(){run('apiCost',[],function(c){$('costTop').textContent='ZEUS luna asta: '+c.luna.toFixed(2)+' / '+c.plafon+' $';},function(){});}
+function incarcaDash(fortat){$('bRef').disabled=true;$('dGen').textContent=fortat?'Recalculez din surse (20-60 s)…':'Se încarcă…';
+  run('apiDashboard',[!!fortat],function(d){$('bRef').disabled=false;$('dGen').textContent='Calculat la '+d.generat+' (se recalculează automat la fiecare oră)';var h='';
+    d.carduri.forEach(function(c){h+='<div class="card'+(c.eroare?' bad':'')+'"><div class="pal">'+esc(c.palier)+'</div><h3>'+esc(c.titlu)+'</h3>';
+      if(c.eroare){h+='<div class="v">'+esc(c.eroare)+'</div>';}else{h+='<div class="v">'+esc(c.valoare)+'</div><div class="e">'+esc(c.eticheta||'')+'</div>';
+        if(c.detalii&&c.detalii.length){h+='<table>';c.detalii.forEach(function(r){h+='<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>';});h+='</table>';}
+        if(c.definitie)h+='<div class="def">'+esc(c.definitie)+'</div>';}
+      h+='<div class="src">Sursa: '+(c.link?'<a href="'+esc(c.link)+'" target="_blank" rel="noopener">'+esc(c.sursa)+'</a>':esc(c.sursa||''))+' · citit la '+esc(c.citit_la)+'</div></div>';});
+    $('grid').innerHTML=h;},function(e){$('bRef').disabled=false;$('dGen').innerHTML='<span class="err">'+esc(e.message||e)+'</span>';});}
+function auto(){var q=$('q');q.style.height='auto';q.style.height=Math.min(q.scrollHeight,220)+'px';}
+$('q').addEventListener('input',auto);
+$('q').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();trimite();}});
+if(window.innerWidth<760)$('bIst').style.display='';
+initGoogle();
+if(SES){post({act:'eu',sesiune:SES}).then(function(j){if(j.ok)intrat(j.rez.utilizator);else iesire();}).catch(function(){iesire();});}
+</script>
+</body>
+</html>

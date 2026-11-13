@@ -135,6 +135,14 @@ body.on-chat footer{display:none}
 .steps-head svg{width:12px;height:12px;flex-shrink:0;transform:rotate(135deg);transition:transform .15s}
 .steps.open .steps-head svg{transform:rotate(-45deg)}
 .steps-list{margin:8px 0 2px 6px;padding:0 0 0 18px;border-left:1px solid #ffd8bd26;font-size:11.5px;color:#f1c7b6;line-height:1.75}
+.files{display:flex;flex-wrap:wrap;gap:10px;align-self:flex-start;max-width:100%}
+.file-card{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid #feed6566;background:#feed6514;color:#fff;text-decoration:none;max-width:100%;transition:background .15s}
+.file-card:hover{background:#feed6526}
+.file-card>svg{width:20px;height:20px;color:var(--yellow);flex-shrink:0}
+.file-card>svg:last-child{width:13px;height:13px;color:#f1c7b6}
+.file-card span{min-width:0}
+.file-card strong{display:block;font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.file-card small{display:block;font-size:11px;color:#f1c7b6;margin-top:2px}
 .steps-list li{padding-left:4px;overflow-wrap:anywhere}
 @media(max-width:899px){
   .chat-layout{grid-template-columns:1fr}
@@ -302,7 +310,7 @@ function md(t){return DOMPurify.sanitize(marked.parse(t||''));}
 /* ---------- API ---------- */
 var SES=null;try{SES=localStorage.getItem('zeus_ses');}catch(e){}
 var EU={nume:'',email:''};
-var ACT={apiTrimite:'trimite',apiProgres:'progres',apiIstoric:'istoric',apiDeschide:'deschide',apiOpreste:'opreste',apiDashboard:'dashboard',apiCost:'cost',apiImprumuturi:'imprumuturi',apiTva:'tva'};
+var ACT={apiTrimite:'trimite',apiProgres:'progres',apiIstoric:'istoric',apiDeschide:'deschide',apiOpreste:'opreste',apiDashboard:'dashboard',apiCost:'cost',apiImprumuturi:'imprumuturi',apiTva:'tva',apiFisiere:'fisiere'};
 function post(o){return fetch(CFG.api,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json();});}
 function run(fn,args,ok,ko){ko=ko||function(e){eroare(e);};post({act:ACT[fn],args:args||[],sesiune:SES}).then(function(j){if(j.ok)ok(j.rez);else{if(/SESIUNE/.test(j.eroare))iesire();ko(new Error(j.eroare));}}).catch(ko);}
 
@@ -495,13 +503,16 @@ function gata(){lucreaza(false);incarcaIstoric();incarcaCost();}
 function auto(){var q=$('q');q.style.height='auto';q.style.height=Math.min(q.scrollHeight,200)+'px';}
 function trimite(){var t=$('q').value.trim();if(!t||S.merge)return;$('q').value='';auto();adauga('u',t);S.trimisLocal=true;lucreaza(true);
   run('apiTrimite',[S.sid,t],function(r){if(!S.sid)S.sid=r.sid;S.err=0;setTimeout(sondaj,2500);},function(e){eroare(e);});}
+function fisiereHtml(l){return '<div class="files">'+l.map(function(f){return '<a class="file-card" href="'+esc(f.url)+'" target="_blank" rel="noopener">'+ic('doc')+'<span><strong>'+esc(f.nume)+'</strong><small>Deschide în Drive'+(f.marime?' · '+Math.max(1,Math.round(f.marime/1024))+' KB':'')+'</small></span>'+ic('up')+'</a>';}).join('')+'</div>';}
+function arataFisiere(l){if(!l||!l.length)return;var ex={};document.querySelectorAll('#msgs .file-card').forEach(function(a){ex[a.getAttribute('href')]=1;});l=l.filter(function(f){return !ex[f.url];});if(!l.length)return;var d=document.createElement('div');d.innerHTML=fisiereHtml(l);$('msgs').appendChild(d.firstChild);$('msgs').scrollTop=1e9;}
+function cereFisiere(sid,incercari){if(!sid)return;run('apiFisiere',[sid],function(l){if(l&&l.length){if(S.sid===sid)arataFisiere(l);}else if(incercari>0)setTimeout(function(){cereFisiere(sid,incercari-1);},5000);},function(){});}
 function sondaj(){if(!S.sid||!S.merge)return;run('apiProgres',[S.sid,S.cursor],function(r){S.err=0;randare(r.evenimente||[]);
-  if(r.gata){gata();inchidePasi(r.cost);}else setTimeout(sondaj,2500);},
+  if(r.gata){var sid0=S.sid;gata();inchidePasi(r.cost);if(r.fisiere&&r.fisiere.length)arataFisiere(r.fisiere);else cereFisiere(sid0,3);}else setTimeout(sondaj,2500);},
   function(e){S.err++;if(S.err>6)eroare(e);else setTimeout(sondaj,4000);});}
 function conversatieNoua(){if(S.merge)return;S={sid:null,cursor:null,vazut:{},merge:false,err:0,act:null};bunVenit();$('side').classList.remove('on');marcheaza();$('q').focus();}
 function marcheaza(){$('hist').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-sid')===S.sid);});}
 function deschideConv(sid){if(S.merge)return;S={sid:sid,cursor:null,vazut:{},merge:false,err:0,act:null};$('msgs').innerHTML='';stare('Se încarcă conversația…');marcheaza();
-  run('apiDeschide',[sid],function(r){stare(null);$('msgs').innerHTML='';randare(r.evenimente||[]);inchidePasi(null);if(innerWidth<900)$('side').classList.remove('on');});}
+  run('apiDeschide',[sid],function(r){stare(null);$('msgs').innerHTML='';randare(r.evenimente||[]);inchidePasi(null);cereFisiere(sid,0);if(innerWidth<900)$('side').classList.remove('on');});}
 function incarcaIstoric(){run('apiIstoric',[],function(l){$('hist').innerHTML=l.length?l.map(function(x){return '<button type="button" data-sid="'+esc(x.sid)+'">'+esc(x.titlu)+'<small>'+esc(x.la)+(x.cost?' · '+Number(x.cost.usd).toFixed(2)+' $':'')+'</small></button>';}).join(''):'<div class="empty-note" style="padding:10px">Încă nicio conversație.</div>';marcheaza();},function(){});}
 var COST=null;
 function incarcaCost(){run('apiCost',[],function(c){COST=c;$('costTxt').textContent='Costul ZEUS luna asta: '+c.luna.toFixed(2)+' / '+c.plafon+' $';},function(){});}

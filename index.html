@@ -490,7 +490,7 @@ var NUME_U={citeste_foaie:'citește',structura_sursa:'verifică structura',cauta
 var retFocus=null;
 function deschideOv(id){retFocus=document.activeElement;$(id).hidden=false;document.body.classList.add('locked');}
 function inchide(){document.querySelectorAll('.overlay').forEach(function(o){o.hidden=true;});document.body.classList.remove('locked');try{retFocus&&retFocus.focus();}catch(e){}}
-function bunVenit(){$('msgs').innerHTML='<div class="message bot"><strong>ZEUS</strong><div class="md welcome">Întreabă orice despre TEG: <b>cash flow, plăți, cereri, contracte, procese, oportunități, bugete, artiști, vânzări</b> și memoria proiectului. Citesc sursele acum, calculez și îți dau sursa și ora fiecărei cifre. Doar citire.</div></div>';}
+function bunVenit(){$('msgs').innerHTML='<div class="message bot"><strong>ZEUS</strong><div class="md welcome">Întreabă orice despre TEG: <b>cash flow, plăți, cereri, contracte, procese, oportunități, bugete, artiști, vânzări</b> și memoria proiectului. Citesc sursele acum, calculez și îți dau sursa și ora fiecărei cifre. Pot și pregăti o cerere de plată (ex. „cer plata la Ibis jumătate din sold”): o trimiți tu, din card.</div></div>';}
 function deschideChat(q){if(location.hash!=='#asistent')location.hash='asistent';else pagina();if(!$('msgs').children.length)bunVenit();if(q){if(S.merge){$('q').value=q;return;}$('q').value=q;trimite();}}
 function adauga(cine,html,brut){var d=document.createElement('div');d.className='message '+(cine==='u'?'user':'bot');
   if(cine==='u')d.textContent=html;else{d.innerHTML='<strong>ZEUS</strong><div class="md"></div>';d.querySelector('.md').innerHTML=brut?html:md(html);}

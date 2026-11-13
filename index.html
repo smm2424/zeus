@@ -42,6 +42,7 @@ body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;back
 .card .lbl{font-size:11px;color:#f1c7b6;margin-bottom:6px}
 .card .def{font-size:10px;color:#e3b3a1;font-style:italic;margin-top:10px;line-height:1.5}
 .card .src{margin-top:auto;padding-top:14px;font-size:10px;color:#e8bba6;line-height:1.5}
+.panel.fiscal{margin-top:18px}.fsel{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:14px 0}.fsel label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:#e8bfae}.fsel select{background:#1a1012;color:var(--text);border:1px solid #ffffff26;border-radius:10px;padding:9px 10px;font-size:13px;min-width:240px;max-width:100%}.farr{padding-bottom:9px;color:#feed65}.fout{font-size:12px;color:var(--text)}.fbx{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 12px}.fbx>div{background:#ffffff0d;border-radius:14px;padding:12px}.fbx small{display:block;color:#e8bfae;font-size:10px;letter-spacing:.04em;text-transform:uppercase}.fbx b{display:block;font-size:20px;margin:4px 0}.fbx span{font-size:11px;color:#e3b3a1}.fbx .hl{background:#feed651c;border:1px solid #feed6544}.fnote{margin:8px 0;line-height:1.5}.fwarn{margin:6px 0;padding:8px 10px;border-radius:10px;background:#feed6514;color:#feed65;font-size:11px}.ftw{overflow-x:auto}.ftab{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}.ftab th{color:#e8bfae;font-weight:600;text-align:left;padding:6px;border-bottom:1px solid #ffffff22;white-space:nowrap}.ftab td{padding:6px;border-bottom:1px solid #ffffff12;vertical-align:top}.ftab td.n,.ftab th.n{text-align:right;white-space:nowrap}.fout details{margin-top:10px}.fout summary{cursor:pointer;color:#feed65}.fsrc{margin-top:10px;font-size:10px;color:#e8bba6}@media(max-width:760px){.fbx{grid-template-columns:1fr}.fsel select{min-width:0;width:100%}.fsel label{width:100%}.farr{display:none}}
 .card details.mx{margin-top:10px;font-size:11px}.card details.mx summary{cursor:pointer;color:#feed65}.mxw{overflow-x:auto;margin-top:8px}.mxw table{border-collapse:collapse;font-size:10px;white-space:nowrap}.mxw th,.mxw td{border:1px solid #ffffff1a;padding:4px 6px;text-align:right}.mxw th{color:#e8bfae;font-weight:600}.mxw td.z{color:#ffffff40}.mx .cap{font-size:10px;color:#e3b3a1;font-style:italic;margin:6px 0}
 .card .src a{color:var(--yellow);text-decoration:underline;text-underline-offset:2px}
 .card.bad{border-color:#feed6540}.card.bad .big{font-size:13px;color:var(--yellow);letter-spacing:0}
@@ -237,6 +238,16 @@ body.on-chat footer{display:none}
       </section>
     </div>
     <div class="insight"><span class="insight-symbol"><span data-i="spark"></span></span><div><strong>Dincolo de cifre</strong><p id="insightTxt">Cere-i lui ZEUS contextul: listele complete, comparațiile și de unde vine fiecare cifră.</p></div><button type="button" data-ask="Explică-mi dashboard-ul de azi: ce s-a schimbat, ce e urgent și ce verific mai întâi.">Analizează cu ZEUS <span data-i="arrow"></span></button></div>
+    <section class="panel fiscal" id="secImp">
+      <div class="section-heading"><div><h2>Împrumuturi între firme</h2><p>Ca în foaia „Chestionar Pivot Imprumuturi”: alegi firma care împrumută și firma împrumutată. Soldul din 31.12.2025 e inclus; citit din registru în momentul selecției.</p></div><span class="tag">IMPRUMUTURI 2026</span></div>
+      <div class="fsel"><label>Firma care împrumută<select id="impA"></select></label><span class="farr">→</span><label>Firma împrumutată<select id="impB"></select></label></div>
+      <div id="impOut" class="fout">Se încarcă…</div>
+    </section>
+    <section class="panel fiscal" id="secTva">
+      <div class="section-heading"><div><h2>TVA pe firmă</h2><p>Estimare din facturile IN / OUT din cash flow, nu decont. Regimul (TVA la facturare sau la încasare) e citit de la ANAF; citit în momentul selecției.</p></div><span class="tag">ESTIMARE</span></div>
+      <div class="fsel"><label>Firma<select id="tvaF"></select></label><label>Luna<select id="tvaL"></select></label></div>
+      <div id="tvaOut" class="fout">Se încarcă…</div>
+    </section>
     <section class="panel payments">
       <div class="section-heading"><div><h2>Toate cifrele, cu sursa</h2><p>Cartonașele complete, recalculate automat la fiecare oră</p></div><span class="tag">SURSE LIVE</span></div>
       <div class="cards" id="cards"></div>
@@ -291,7 +302,7 @@ function md(t){return DOMPurify.sanitize(marked.parse(t||''));}
 /* ---------- API ---------- */
 var SES=null;try{SES=localStorage.getItem('zeus_ses');}catch(e){}
 var EU={nume:'',email:''};
-var ACT={apiTrimite:'trimite',apiProgres:'progres',apiIstoric:'istoric',apiDeschide:'deschide',apiOpreste:'opreste',apiDashboard:'dashboard',apiCost:'cost'};
+var ACT={apiTrimite:'trimite',apiProgres:'progres',apiIstoric:'istoric',apiDeschide:'deschide',apiOpreste:'opreste',apiDashboard:'dashboard',apiCost:'cost',apiImprumuturi:'imprumuturi',apiTva:'tva'};
 function post(o){return fetch(CFG.api,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json();});}
 function run(fn,args,ok,ko){ko=ko||function(e){eroare(e);};post({act:ACT[fn],args:args||[],sesiune:SES}).then(function(j){if(j.ok)ok(j.rez);else{if(/SESIUNE/.test(j.eroare))iesire();ko(new Error(j.eroare));}}).catch(ko);}
 
@@ -331,10 +342,54 @@ var DASH=null;
 function incarcaDash(fortat){$('bRefresh').disabled=true;$('dStatus').textContent=fortat?'Recalculez din surse (20-60 s)…':'Se încarcă…';
   run('apiDashboard',[!!fortat],function(d){DASH=d;$('bRefresh').disabled=false;randeaza(d);},function(e){$('bRefresh').disabled=false;$('dStatus').textContent='Eroare: '+(e.message||e);$('hStatus').textContent='Cifrele nu s-au putut încărca';});}
 
-function randeaza(d){
+/* ===== Fiscal: Împrumuturi (pe pereche) și TVA pe firmă, calculate la cerere ===== */
+var FIS={init:false};
+var LUNI_RO=['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
+function lunaTxt(l){return LUNI_RO[+l.slice(5,7)-1]+' '+l.slice(0,4);}
+function leiF(n){var s=(Math.round(n*100)/100).toFixed(2).split('.');return (s[0].charAt(0)==='-'?'-':'')+s[0].replace('-','').replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+s[1];}
+function opt(l,sel){return l.map(function(x){var v=typeof x==='string'?x:x[0],t=typeof x==='string'?x:x[1];return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(t)+'</option>';}).join('');}
+function lnk(u,t){return /^https?:\/\//.test(u||'')?'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(t)+'</a>':esc(t);}
+function fiscalInit(){if(FIS.init)return;FIS.init=true;
+  run('apiImprumuturi',['',''],function(r){var a=r.firme.indexOf('BALVIA DEVELOPMENT SRL')>=0?'BALVIA DEVELOPMENT SRL':r.firme[0],b=r.firme.indexOf('CODRU FESTIVAL SRL')>=0?'CODRU FESTIVAL SRL':r.firme[1];
+    $('impA').innerHTML=opt(r.firme,a);$('impB').innerHTML=opt([['*','(toate firmele)']].concat(r.firme),b);$('impA').onchange=impCalc;$('impB').onchange=impCalc;impCalc();},
+    function(e){$('impOut').textContent='Registrul de împrumuturi n-a putut fi citit: '+(e.message||e);});
+  run('apiTva',['',''],function(r){$('tvaF').innerHTML=opt(r.firme,'BALVIA DEVELOPMENT SRL');$('tvaL').innerHTML=opt(r.luni.map(function(l,i){return [l,lunaTxt(l)+(i===0?' (luna curentă, la zi)':'')];}),r.luni[0]);
+    $('tvaF').onchange=tvaCalc;$('tvaL').onchange=tvaCalc;tvaCalc();},function(e){$('tvaOut').textContent='Listele n-au putut fi citite: '+(e.message||e);});}
+function impCalc(){var a=$('impA').value,b=$('impB').value;if(a===b){$('impOut').innerHTML='<div class="fwarn">Alege două firme diferite.</div>';return;}
+  $('impOut').textContent='Citesc registrul…';var tok=FIS.it=(FIS.it||0)+1;
+  run('apiImprumuturi',[a,b],function(r){if(tok!==FIS.it)return;$('impOut').innerHTML=b==='*'?impToate(r):impPereche(r);},function(e){if(tok===FIS.it)$('impOut').textContent='Eroare: '+(e.message||e);});}
+function impPereche(r){var h='<div class="fbx">'+
+  '<div><small>'+esc(r.a)+' → '+esc(r.b)+'</small><b>'+leiF(r.ab.total)+' lei</b><span>sold 31.12.2025: '+leiF(r.ab.deschidere)+' · 2026: '+leiF(r.ab.miscari)+' · '+r.ab.n+' rânduri</span></div>'+
+  '<div><small>'+esc(r.b)+' → '+esc(r.a)+'</small><b>'+leiF(r.ba.total)+' lei</b><span>sold 31.12.2025: '+leiF(r.ba.deschidere)+' · 2026: '+leiF(r.ba.miscari)+' · '+r.ba.n+' rânduri</span></div>'+
+  '<div class="hl"><small>Diferența</small><b>'+leiF(r.dif)+' lei</b><span>'+esc(r.interpretare)+'</span></div></div>'+
+  '<div class="fnote">(+) Dacă diferența e pozitivă, firma împrumutată îi datorează suma firmei care împrumută. (-) Dacă e negativă, firma care împrumută îi datorează suma firmei împrumutate.</div>'+
+  (r.nebifate.n?'<div class="fwarn">Rânduri din 2026 nebifate la VEERIFICAT pe perechea asta: '+r.nebifate.n+' · '+leiF(r.nebifate.suma)+' lei.</div>':'')+
+  '<details><summary>Toate rândurile perechii ('+r.randuri.length+')</summary><div class="ftw"><table class="ftab"><tr><th>Data</th><th>Sens</th><th class="n">Sumă (lei)</th><th>Verificat</th><th>Observații</th><th>ID</th><th>Rând</th></tr>'+
+  r.randuri.map(function(o){return '<tr><td>'+esc(o.data)+(o.deschidere?' (sold)':'')+'</td><td>'+esc(o.sens==='A → B'?r.a+' → '+r.b:r.b+' → '+r.a)+'</td><td class="n">'+leiF(o.suma)+'</td><td>'+esc(o.verificat)+'</td><td>'+esc(o.obs)+'</td><td>'+esc(o.id)+'</td><td>'+o.rand+'</td></tr>';}).join('')+'</table></div></details>'+
+  '<div class="fnote">'+esc(r.contabil||'')+'</div>'+fsrc(r);return h;}
+function impToate(r){return '<div class="fbx"><div class="hl"><small>Poziția netă a '+esc(r.a)+'</small><b>'+leiF(r.total)+' lei</b><span>'+(r.total>0?'creditor: ceilalți îi datorează net':r.total<0?'debitor: datorează net celorlalți':'zero')+'</span></div></div>'+
+  '<div class="ftw"><table class="ftab"><tr><th>Firma</th><th class="n">'+esc(r.a)+' → firmă</th><th class="n">firmă → '+esc(r.a)+'</th><th class="n">Diferența</th><th>Cine cui datorează</th></tr>'+
+  r.toate.map(function(x){return '<tr><td>'+esc(x.firma)+'</td><td class="n">'+leiF(x.ab)+'</td><td class="n">'+leiF(x.ba)+'</td><td class="n">'+leiF(x.dif)+'</td><td>'+esc(x.dif>0?x.firma+' îi datorează lui '+r.a:x.dif<0?r.a+' îi datorează lui '+x.firma:'nimic net')+'</td></tr>';}).join('')+'</table></div>'+fsrc(r);}
+function fsrc(r){return '<div class="fsrc">Sursa: '+lnk(r.link,r.sursa)+' · citit la '+esc(r.citit_la)+((r.necunoscute&&r.necunoscute.length)?' · nume de firmă necunoscute (neincluse): '+esc(r.necunoscute.join('; ')):'')+'</div>';}
+function tvaCalc(){var f=$('tvaF').value,l=$('tvaL').value;$('tvaOut').textContent='Citesc cash flow-ul și regimul de la ANAF…';var tok=FIS.tt=(FIS.tt||0)+1;
+  run('apiTva',[f,l],function(r){if(tok!==FIS.tt)return;$('tvaOut').innerHTML=tvaHtml(r);},function(e){if(tok===FIS.tt)$('tvaOut').textContent='Eroare: '+(e.message||e);});}
+function tvaTab(l){var max=60;return '<div class="ftw"><table class="ftab"><tr><th>Data facturii</th><th>Data plății</th><th>Partener</th><th>Document</th><th class="n">Bază (lei)</th><th class="n">TVA (lei)</th><th>Status</th></tr>'+
+  l.slice(0,max).map(function(o){return '<tr><td>'+esc(o.data_factura)+'</td><td>'+esc(o.data_platii)+'</td><td>'+esc(o.partener)+'</td><td>'+lnk(o.link,o.doc||'(fără nr.)')+'</td><td class="n">'+leiF(o.baza)+'</td><td class="n">'+leiF(o.tva)+'</td><td>'+esc(o.status)+'</td></tr>';}).join('')+'</table>'+(l.length>max?'<div class="fnote">Primele '+max+' din '+l.length+', după TVA. Lista completă: întreabă-l pe ZEUS.</div>':'')+'</div>';}
+function tvaHtml(r){var nep=r.rezultat==='neplătitor',rez=nep?'Neplătitor de TVA (ANAF)':r.rezultat==='de plată'?'TVA de plată (estimare)':r.rezultat==='de recuperat'?'TVA de recuperat (estimare)':'TVA (estimare)';
+  var op=r.op_plata&&r.op_plata.length?r.op_plata.map(function(o){return esc(o.obligatie)+' '+esc(o.perioada)+': '+leiF(o.suma)+' lei, scadența '+esc(o.scadenta)+', '+esc(o.stare);}).join('; '):'niciun OP de TVA cu scadența în luna următoare'+(r.op_eroare?' (PLATA OP necitit: '+esc(r.op_eroare)+')':'');
+  return '<div class="fbx">'+
+  '<div><small>TVA colectat · facturi IN</small><b>'+leiF(r.colectat)+' lei</b><span>'+r.n_in+' facturi · bază '+leiF(r.baza_in)+' lei</span></div>'+
+  '<div><small>TVA deductibil · facturi OUT</small><b>'+leiF(r.deductibil)+' lei</b><span>'+r.n_out+' facturi · bază '+leiF(r.baza_out)+' lei</span></div>'+
+  '<div class="hl"><small>'+rez+'</small><b>'+(nep?'-':leiF(Math.abs(r.diferenta))+' lei')+'</b><span>'+esc(r.firma)+' · '+esc(lunaTxt(r.luna))+'</span></div></div>'+
+  '<div class="fnote"><b>Regim TVA:</b> '+esc(r.regim)+(r.cui?' (CUI '+esc(r.cui)+')':'')+' · luna socotită '+esc(r.metoda)+' · perioada '+esc(r.de_la)+' - '+esc(r.pana_la)+'.<br><b>OP real în PLATA OP</b> (TVA-ul lunii se plătește luna următoare): '+op+'.<br>Estimarea nu ține cont de TVA-ul de recuperat reportat din lunile anterioare.</div>'+
+  (r.avertismente||[]).map(function(a){return '<div class="fwarn">'+esc(a)+'</div>';}).join('')+
+  (r.fara_firma&&r.fara_firma.n?'<div class="fwarn">În lună sunt și '+r.fara_firma.n+' facturi cu TVA fără firmă alocată în cash flow (TVA net '+leiF(r.fara_firma.tva)+' lei): nu intră la nicio firmă.</div>':'')+
+  '<details><summary>Facturi IN ('+r.facturi_in.length+')</summary>'+tvaTab(r.facturi_in)+'</details><details><summary>Facturi OUT ('+r.facturi_out.length+')</summary>'+tvaTab(r.facturi_out)+'</details>'+
+  '<div class="fsrc">Sursa: '+lnk(r.link,r.sursa)+' · regim: '+esc(r.regim_sursa)+' · citit la '+esc(r.citit_la)+'</div>';}
+function randeaza(d){fiscalInit();
   var money=card(d,'Poziția de cash (Money)'),sc=card(d,'Scadențe de plată (cash flow)'),cer=card(d,'Cereri de plată'),
       vz=card(d,'CODRU 2027 față de 2026'),ctr=card(d,'Registrul de contracte'),pr=card(d,'Termenele următoare'),
-      lic=card(d,'Licitații și finanțări cu termen'),opex=card(d,'OPEX TEG pe ultimele 12 luni')||card(d,'OPEX TEG 2026 pe luni'),fis=card(d,'TVA pe firme'),imp=card(d,'Împrumuturi între firme · poziția netă'),rec=card(d,'Reconciliere taxe: PLATA OP ↔ cash flow');
+      lic=card(d,'Licitații și finanțări cu termen'),opex=card(d,'OPEX TEG pe ultimele 12 luni')||card(d,'OPEX TEG 2026 pe luni');
   var ok=function(c){return c&&!c.eroare;};
   $('hStatus').textContent='Cifre calculate · '+d.generat;$('dStatus').textContent='Calculat la '+d.generat+' · se recalculează automat la fiecare oră';
 
@@ -349,8 +404,6 @@ function randeaza(d){
   var rows=[];
   if(ok(sc)){var r=det(sc,'Restanțe');if(r&&!/^0,00/.test(r))rows.push(['Plăți restante în cash flow',r+' · scadența a trecut','Restant','red','Care sunt plățile restante din cash flow (OUT, Neachitat, scadența trecută)? Listă completă cu furnizor, sumă, scadență și proiect.']);}
   if(ok(cer)){var t=det(cer,'Cu termenul');if(t&&t!=='niciuna'){var n=t.split(';').length;rows.push(['Cereri de plată cu termenul depășit',n+(n===1?' cerere':' cereri')+' · '+t.split(';')[0].trim(),'Termen depășit','yellow','Ce cereri de plată au termenul depășit? Listă completă cu cod, beneficiar, sumă, termen și status.']);}}
-  if(ok(fis)){var rt=det(fis,'Restanțe TVA'),tv=!/^0,00/.test(fis.valoare);if(tv||(rt&&!/^0 /.test(rt)))rows.push([tv?'TVA de plătit la următoarea scadență':'Taxe nebifate în PLATA OP',(tv?fis.valoare+' · ':'')+'restanțe TVA nebifate: '+(rt||'-'),tv?'TVA':'De lămurit','yellow','Ce TVA și ce alte taxe au firmele grupului de plătit și ce figurează nebifat (restant) în PLATA OP? Pe firme, cu perioada, suma, scadența și data ultimei plăți bifate.']);}
-  if(ok(rec)&&+rec.valoare>0)rows.push(['Taxe: PLATA OP față de cash flow',rec.valoare+' diferențe pe ultimele 3 luni','Reconciliere','muted','Ce taxe sunt în PLATA OP și lipsesc din cash flow (și invers) pe ultimele 3 luni? Listă completă cu firmă, obligație, sumă, scadență și rândul din sursă.']);
   if(ok(ctr)&&+ctr.valoare>0)rows.push(['Contracte nesemnate de ambele părți',ctr.valoare+' contracte · '+(det(ctr,'Expiră')&&det(ctr,'Expiră')!=='niciunul'?'unele expiră în 60 de zile':'fără expirări în 60 de zile'),'Semnături','muted','Ce contracte nu sunt semnate de ambele părți? Listă completă cu ID, partener, valoare și ce semnătură lipsește.']);
   if(ok(pr)&&pr.valoare!=='-')rows.push(['Următorul termen în instanță',pr.valoare+' · '+pr.eticheta.replace(/^următorul termen · /,''),pr.valoare,'red','Ce termene în instanță avem în următoarele 30 de zile și ce trebuie pregătit pentru fiecare?']);
   if(ok(lic)&&+lic.valoare>0)rows.push(['Licitații cu termen de ofertare',lic.valoare+' licitații urmărite au termenul în viitor','Ofertare','muted','Ce licitații urmărite au termenul de ofertare în următoarele 14 zile și unde participăm?']);

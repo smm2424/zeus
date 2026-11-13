@@ -103,6 +103,50 @@ body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;back
 .kv{white-space:normal}
 .message.bot .md table{width:auto}
 
+/* ===== v1.4: asistentul ca pagină + pași restrânși ===== */
+.zeus-tab{color:inherit}
+.chat-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:6px 0 16px}
+.chat-head h1{font-size:30px;margin:6px 0 0}
+.chat-head-tools{display:flex;gap:8px;flex-wrap:wrap}
+.chat-head-tools .secondary{display:flex;align-items:center;gap:7px}
+.chat-head-tools svg{width:14px;height:14px}
+.hist-toggle{display:none!important}
+.chat-layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:stretch}
+.chat-side{padding:16px;display:flex;flex-direction:column;max-height:calc(100dvh - 230px);min-height:420px}
+.side-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#f1c7b6;margin-bottom:8px}
+.chat-side .history{display:block;border:0;background:none;padding:0;margin:0;max-height:none;flex:1;overflow:auto}
+.chat-side .cost{font-size:10px;color:#e8bba6;padding-top:12px;border-top:1px solid #ffffff14;margin-top:10px}
+.chat-main{display:flex;flex-direction:column;height:calc(100dvh - 230px);min-height:480px;padding:18px}
+.chat-main .messages{flex:1;min-height:0;overflow:auto;padding:4px 4px 12px}
+.messages>*{flex-shrink:0}
+.chat-layout>*,.chat-main>*{min-width:0}
+.drawer-form textarea{width:100%}
+.message.bot{max-width:100%}
+.message.user{max-width:80%}
+body.on-chat footer{display:none}
+.steps{align-self:flex-start;max-width:100%}
+.steps-head{display:flex;align-items:center;gap:9px;font-size:12px;color:#f6d8c9;border:1px solid #ffd8bd26;border-radius:20px;padding:7px 12px;background:#ffffff06;max-width:100%}
+.steps-head .pulse{flex-shrink:0;display:none}
+.steps.lucru:not(.gata) .steps-head .pulse{display:block}
+.steps-now{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.steps-n{color:#e3b3a1;font-size:11px;white-space:nowrap}
+.steps-head svg{width:12px;height:12px;flex-shrink:0;transform:rotate(135deg);transition:transform .15s}
+.steps.open .steps-head svg{transform:rotate(-45deg)}
+.steps-list{margin:8px 0 2px 6px;padding:0 0 0 18px;border-left:1px solid #ffd8bd26;font-size:11.5px;color:#f1c7b6;line-height:1.75}
+.steps-list li{padding-left:4px;overflow-wrap:anywhere}
+@media(max-width:899px){
+  .chat-layout{grid-template-columns:1fr}
+  .hist-toggle{display:flex!important}
+  .chat-side{display:none;max-height:50vh;min-height:0}
+  .chat-side.on{display:flex}
+  .chat-head h1{font-size:24px}
+  .chat-main{height:calc(100dvh - 300px);padding:12px;min-height:400px}
+  .chat-main .hint{display:none}
+  .chat-head{margin:0 0 10px}
+  .chat-head .eyebrow{display:none}
+  .message.user{max-width:90%}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" integrity="sha384-/TQbtLCAerC3jgaim+N78RZSDYV7ryeoBCVqTuzRrFec2akfBkHS7ACQ3PQhvMVi" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a" crossorigin="anonymous"></script>
@@ -125,11 +169,10 @@ body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;back
   <nav class="desktop-nav" aria-label="Navigare principală">
     <a href="#comanda" id="nHome" class="active"><span data-i="home"></span>Comandă</a>
     <a href="#dashboard" id="nDash"><span data-i="chart"></span>Dashboard</a>
-    <button type="button" data-open-chat><span data-i="spark"></span>Asistent</button>
+    <a href="#asistent" id="nChat"><span data-i="spark"></span>Asistent</a>
   </nav>
   <div class="header-right">
-    <span class="private"><span data-i="users"></span> Spațiul asociaților</span>
-    <button class="icon-button" id="bell" aria-label="Ce merită atenția"><span data-i="bell"></span><i id="bellDot" hidden></i></button>
+        <button class="icon-button" id="bell" aria-label="Ce merită atenția"><span data-i="bell"></span><i id="bellDot" hidden></i></button>
     <button class="avatar" id="avatar" aria-label="Contul tău">··</button>
   </div>
 </header>
@@ -182,7 +225,7 @@ body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;back
     <section class="metrics four" id="mDash"></section>
     <div class="dashboard-grid">
       <section class="panel cashflow">
-        <div class="section-heading"><div><h2>OPEX TEG pe luni</h2><p id="opexSub">Cheltuieli fără TVA, secțiunea „Cheltuială proiect”</p></div><span class="tag">BUGET ADMINISTRATIV</span></div>
+        <div class="section-heading"><div><h2>OPEX TEG · ultimele 12 luni</h2><p id="opexSub">Cheltuieli fără TVA, secțiunea „Cheltuială proiect”</p></div><span class="tag">BUGET ADMINISTRATIV</span></div>
         <div id="opexChart"></div>
       </section>
       <section class="panel allocation">
@@ -197,25 +240,30 @@ body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;back
     </section>
   </div>
 
+  <!-- ===== ASISTENT ===== -->
+  <div class="view" id="vChat" hidden>
+    <div class="chat-head">
+      <div><div class="eyebrow">ASISTENTUL ORGANIZAȚIEI</div><h1>Discută cu ZEUS</h1></div>
+      <div class="chat-head-tools"><button type="button" class="secondary" id="bNew"><span data-i="spark"></span> Conversație nouă</button><button type="button" class="secondary hist-toggle" id="bHist"><span data-i="clock"></span> Istoricul tău</button></div>
+    </div>
+    <div class="chat-layout">
+      <aside class="panel chat-side" id="side"><div class="side-title">Istoricul tău</div><div class="history" id="hist"></div><div class="cost" id="costTxt"></div></aside>
+      <section class="panel chat-main">
+        <div class="messages" id="msgs" aria-live="polite"></div>
+        <form class="drawer-form" id="chatForm"><label class="sr-only" for="q">Întrebarea ta</label><textarea id="q" rows="1" placeholder="Ex.: Cât avem de plătit în următoarele 14 zile?"></textarea><button type="button" class="stop" id="bStop" hidden>Oprește</button><button class="yellow-button" id="bSend" aria-label="Trimite"><span data-i="send"></span></button></form>
+        <div class="hint">Enter trimite · Shift+Enter rând nou · răspunsul vine de obicei în 30-90 de secunde.</div>
+      </section>
+    </div>
+  </div>
+
   <footer><span><i></i> ZEUS / TEG</span><p>Doar citire: ZEUS nu modifică foi și nu trimite mesaje. Cifrele vin din sursele TEG, cu ora citirii.</p><span>Doar pentru asociați</span></footer>
 </main>
 
 <nav class="mobile-nav" aria-label="Navigare mobil">
   <a href="#comanda" id="mHomeNav" class="active"><span data-i="home"></span>Comandă</a>
-  <button type="button" data-open-chat><span data-i="spark"></span>ZEUS</button>
+  <a href="#asistent" id="mChatNav" class="zeus-tab"><span data-i="spark"></span>ZEUS</a>
   <a href="#dashboard" id="mDashNav"><span data-i="chart"></span>Dashboard</a>
 </nav>
-
-<div class="overlay" id="chatOv" hidden>
-  <section class="chat-drawer" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
-    <div class="drawer-header"><div><span class="eyebrow">ASISTENTUL ORGANIZAȚIEI</span><h2 id="chatTitle"><span data-i="spark"></span> Discută cu ZEUS</h2></div><button class="icon-button" data-close aria-label="Închide"><span data-i="close"></span></button></div>
-    <div class="drawer-tools"><button type="button" id="bNew"><span data-i="spark"></span>Conversație nouă</button><button type="button" id="bHist"><span data-i="clock"></span>Istoricul tău</button><span class="cost" id="costTxt"></span></div>
-    <div class="history" id="hist"></div>
-    <div class="messages" id="msgs" aria-live="polite"></div>
-    <form class="drawer-form" id="chatForm"><label class="sr-only" for="q">Întrebarea ta</label><textarea id="q" rows="1" placeholder="Ex.: Cât avem de plătit în următoarele 14 zile?"></textarea><button type="button" class="stop" id="bStop" hidden>Oprește</button><button class="yellow-button" id="bSend" aria-label="Trimite"><span data-i="send"></span></button></form>
-    <div class="hint">Enter trimite · Shift+Enter rând nou · ZEUS citește sursele în timp real, de obicei în 30-90 de secunde.</div>
-  </section>
-</div>
 
 <div class="overlay centered" id="modalOv" hidden>
   <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
@@ -256,8 +304,10 @@ function initGoogle(){if(!window.google||!google.accounts)return setTimeout(init
   google.accounts.id.renderButton($('gbtn'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'ro'});}
 
 /* ---------- navigare ---------- */
-function pagina(){var d=(location.hash||'').indexOf('dashboard')>=0;$('vHome').hidden=d;$('vDash').hidden=!d;
-  ['nHome','mHomeNav'].forEach(function(i){$(i).classList.toggle('active',!d);});['nDash','mDashNav'].forEach(function(i){$(i).classList.toggle('active',d);});window.scrollTo(0,0);}
+function pagina(){var h=location.hash||'',v=h.indexOf('dashboard')>=0?'d':(h.indexOf('asistent')>=0?'c':'h');
+  $('vHome').hidden=v!=='h';$('vDash').hidden=v!=='d';$('vChat').hidden=v!=='c';document.body.classList.toggle('on-chat',v==='c');
+  [['nHome','h'],['mHomeNav','h'],['nDash','d'],['mDashNav','d'],['nChat','c'],['mChatNav','c']].forEach(function(x){$(x[0]).classList.toggle('active',v===x[1]);});
+  if(v==='c'){if(!$('msgs').children.length)bunVenit();setTimeout(function(){$('q').focus();$('msgs').scrollTop=1e9;},60);}else window.scrollTo(0,0);}
 window.addEventListener('hashchange',pagina);
 
 /* ---------- formatare ---------- */
@@ -281,7 +331,7 @@ function incarcaDash(fortat){$('bRefresh').disabled=true;$('dStatus').textConten
 function randeaza(d){
   var money=card(d,'Poziția de cash (Money)'),sc=card(d,'Scadențe de plată (cash flow)'),cer=card(d,'Cereri de plată'),
       vz=card(d,'CODRU 2027 față de 2026'),ctr=card(d,'Registrul de contracte'),pr=card(d,'Termenele următoare'),
-      lic=card(d,'Licitații și finanțări cu termen'),opex=card(d,'OPEX TEG 2026 pe luni'),fis=card(d,'Taxe și împrumuturi între firme');
+      lic=card(d,'Licitații și finanțări cu termen'),opex=card(d,'OPEX TEG pe ultimele 12 luni')||card(d,'OPEX TEG 2026 pe luni'),fis=card(d,'Taxe și împrumuturi între firme');
   var ok=function(c){return c&&!c.eroare;};
   $('hStatus').textContent='Cifre calculate · '+d.generat;$('dStatus').textContent='Calculat la '+d.generat+' · se recalculează automat la fiecare oră';
 
@@ -329,10 +379,10 @@ function randeaza(d){
   if(ok(opex)){var lun=opex.detalii.filter(function(x){return /^\d{4}-\d{2}/.test(x[0]);}).map(function(x){return [x[0],num(x[1])];});
     var mx=Math.max.apply(null,lun.map(function(x){return x[1]||0;}).concat([1]));
     var ref=det(opex,'Referința');
-    $('opexSub').textContent='Fără TVA · total 2026: '+opex.valoare+(ref?' · referința lunară (Money): '+ref:'');
+    $('opexSub').textContent='Fără TVA · ultimele 12 luni: '+opex.valoare+(ref?' · referința lunară (Money): '+ref:'');
     $('opexChart').innerHTML='<div class="chart-key"><span><i class="key-red"></i>OPEX pe lună, fără TVA</span><span class="chart-unit">lei</span></div><div class="bar-chart"><div class="plot">'+
-      lun.map(function(x){var mm=+x[0].slice(5,7);return '<div class="bar-group" title="'+esc(x[0])+': '+esc(x[1]==null?'-':x[1].toLocaleString('ro-RO',{maximumFractionDigits:2}))+' lei"><div class="bars one" style="flex-direction:column;align-items:center;justify-content:flex-end"><b>'+(x[1]==null?'-':Math.round(x[1]/1000)+'k')+'</b><i style="height:'+Math.round((x[1]||0)/mx*88)+'%"></i></div><span>'+LUNI[mm-1]+(/în curs/.test(x[0])?'*':'')+'</span></div>';}).join('')+
-      '</div></div><div class="opex-ref">* luna în curs. Sursa: '+(opex.link?'<a class="yellow-text" href="'+esc(opex.link)+'" target="_blank" rel="noopener">'+esc(opex.sursa)+'</a>':esc(opex.sursa))+' · citit la '+esc(opex.citit_la)+'</div>';}
+      lun.map(function(x,i){var mm=+x[0].slice(5,7),yy=x[0].slice(2,4);return '<div class="bar-group" title="'+esc(x[0])+': '+esc(x[1]==null?'fără date în sursă':x[1].toLocaleString('ro-RO',{maximumFractionDigits:2})+' lei')+'"><div class="bars one" style="flex-direction:column;align-items:center;justify-content:flex-end"><b>'+(x[1]==null?'n/a':Math.round(x[1]/1000)+'k')+'</b><i style="height:'+Math.round((x[1]||0)/mx*84)+'%"></i></div><span>'+LUNI[mm-1]+(i===0||mm===1?" '"+yy:'')+(/în curs/.test(x[0])?'*':'')+'</span></div>';}).join('')+
+      '</div></div><div class="opex-ref">* luna în curs · n/a = foaia OPEX acoperă doar 2026. Sursa: '+(opex.link?'<a class="yellow-text" href="'+esc(opex.link)+'" target="_blank" rel="noopener">'+esc(opex.sursa)+'</a>':esc(opex.sursa))+' · citit la '+esc(opex.citit_la)+'</div>';}
   else $('opexChart').innerHTML='<div class="empty-note">'+esc(opex&&opex.eroare||'OPEX indisponibil')+'</div>';
 
   /* contracte (donut real) */
@@ -353,23 +403,31 @@ function randeaza(d){
 
 /* ---------- chat (sertarul) ---------- */
 var S={sid:null,cursor:null,vazut:{},merge:false,err:0,act:null};
-var NUME_U={citeste_foaie:'citește foaia',structura_sursa:'structura',cauta_drive:'caută în Drive',lista_folder:'listează folderul',citeste_fisier:'citește fișierul',memorie:'memoria',web_search:'caută pe internet',web_fetch:'citește pagina',bash:'calculează',read:'citește',grep:'caută',glob:'caută fișiere',write:'scrie în sandbox'};
+var NUME_U={citeste_foaie:'citește',structura_sursa:'verifică structura',cauta_drive:'caută în Drive',lista_folder:'listează folderul',citeste_fisier:'citește fișierul',memorie:'citește memoria',web_search:'caută pe internet',web_fetch:'citește pagina',bash:'calculează',read:'citește datele încărcate',grep:'caută în date',glob:'caută fișiere',write:'pregătește calculul',edit:'pregătește calculul'};
 var retFocus=null;
 function deschideOv(id){retFocus=document.activeElement;$(id).hidden=false;document.body.classList.add('locked');}
 function inchide(){document.querySelectorAll('.overlay').forEach(function(o){o.hidden=true;});document.body.classList.remove('locked');try{retFocus&&retFocus.focus();}catch(e){}}
 function bunVenit(){$('msgs').innerHTML='<div class="message bot"><strong>ZEUS</strong><div class="md welcome">Întreabă orice despre TEG: <b>cash flow, plăți, cereri, contracte, procese, oportunități, bugete, artiști, vânzări</b> și memoria proiectului. Citesc sursele acum, calculez și îți dau sursa și ora fiecărei cifre. Doar citire.</div></div>';}
-function deschideChat(q){deschideOv('chatOv');if(!$('msgs').children.length)bunVenit();if(q){$('q').value=q;trimite();}setTimeout(function(){$('q').focus();},60);}
+function deschideChat(q){if(location.hash!=='#asistent')location.hash='asistent';else pagina();if(!$('msgs').children.length)bunVenit();if(q){if(S.merge){$('q').value=q;return;}$('q').value=q;trimite();}}
 function adauga(cine,html,brut){var d=document.createElement('div');d.className='message '+(cine==='u'?'user':'bot');
   if(cine==='u')d.textContent=html;else{d.innerHTML='<strong>ZEUS</strong><div class="md"></div>';d.querySelector('.md').innerHTML=brut?html:md(html);}
   $('msgs').appendChild(d);$('msgs').scrollTop=1e9;S.act=null;return d;}
-function activitate(t){if(!S.act){S.act=document.createElement('div');S.act.className='acts';$('msgs').appendChild(S.act);}var c=document.createElement('span');c.textContent=t;S.act.appendChild(c);$('msgs').scrollTop=1e9;}
-function stare(t){var s=$('thinking');if(!t){if(s)s.remove();return;}if(!s){s=document.createElement('div');s.id='thinking';s.className='thinking';s.innerHTML='<span class="pulse"></span><span></span>';}$('msgs').appendChild(s);s.lastChild.textContent=t;$('msgs').scrollTop=1e9;}
+function cap(t){t=String(t||'');return t.charAt(0).toUpperCase()+t.slice(1);}
+function grupPasi(){if(!S.act){var g=document.createElement('div');g.className='steps';g.innerHTML='<button type="button" class="steps-head" aria-expanded="false"><span class="pulse"></span><span class="steps-now"></span><span class="steps-n"></span>'+ic('up')+'</button><ol class="steps-list" hidden></ol>';
+  g.querySelector('.steps-head').addEventListener('click',function(){var l=g.querySelector('.steps-list');l.hidden=!l.hidden;this.setAttribute('aria-expanded',String(!l.hidden));g.classList.toggle('open',!l.hidden);});
+  $('msgs').appendChild(g);S.act=g;}return S.act;}
+function activitate(t){var g=grupPasi(),li=document.createElement('li');document.querySelectorAll('.steps.lucru').forEach(function(x){if(x!==g)x.classList.remove('lucru');});g.classList.add('lucru');li.textContent=cap(t);g.querySelector('.steps-list').appendChild(li);
+  var n=g.querySelectorAll('li').length;g.querySelector('.steps-now').textContent=cap(t);g.querySelector('.steps-n').textContent=n+(n===1?' pas':' pași');stare(null);$('msgs').scrollTop=1e9;}
+function inchidePasi(cost){document.querySelectorAll('.steps.lucru').forEach(function(g){g.classList.remove('lucru');});
+  var gs=document.querySelectorAll('.steps');gs.forEach(function(g){var n=g.querySelectorAll('li').length;g.classList.add('gata');g.querySelector('.steps-now').textContent=n+(n===1?' pas făcut':' pași făcuți');g.querySelector('.steps-n').textContent='';});
+  if(cost!=null&&gs.length){var u=gs[gs.length-1];u.querySelector('.steps-n').textContent='cost '+Number(cost).toFixed(2)+' $';}}
+function stare(t){var s=$('thinking');if(!t){if(s)s.remove();return;}if(S.act&&!S.act.classList.contains('gata')){S.act.classList.add('lucru');if(s)s.remove();return;}if(!s){s=document.createElement('div');s.id='thinking';s.className='thinking';s.innerHTML='<span class="pulse"></span><span></span>';}$('msgs').appendChild(s);s.lastChild.textContent=t;$('msgs').scrollTop=1e9;}
 function eroare(e){adauga('a','<span class="err">Eroare: '+esc(String(e&&e.message||e))+'</span>',true);gata();}
 function curataPrefix(t){return String(t||'').replace(/^\[[^\]]{3,80}\]\n/,'');}
 function randare(evs){evs.forEach(function(e){if(S.vazut[e.id])return;S.vazut[e.id]=1;if(e.la)S.cursor=e.la;
   if(e.t==='user.message'){if(!S.merge||!S.trimisLocal)adauga('u',curataPrefix(e.text));S.trimisLocal=false;}
   else if(e.t==='agent.message'){if(e.text&&e.text.trim()){stare(null);adauga('a',e.text);if(S.merge)stare('ZEUS continuă…');}}
-  else if(e.t==='agent.custom_tool_use'||e.t==='agent.tool_use'){var n=(NUME_U[e.unealta]||e.unealta)+(e.intrare?' · '+e.intrare:'');activitate(n);stare('ZEUS: '+n+'…');}
+  else if(e.t==='agent.custom_tool_use'||e.t==='agent.tool_use'){var n=(NUME_U[e.unealta]||e.unealta)+(e.intrare?' · '+e.intrare:'');activitate(n);}
   else if(e.t==='agent.thinking'){stare('ZEUS gândește…');}
   else if(e.t==='session.error'){adauga('a','<span class="err">Eroare de sesiune: '+esc(e.text)+'</span>',true);}
   else if(e.t==='session.status_idle'&&e.motiv==='budget_reached'){adauga('a','<span class="err">Conversația a atins plafonul tehnic de cost (8 $). Pornește o conversație nouă.</span>',true);}
@@ -380,15 +438,15 @@ function auto(){var q=$('q');q.style.height='auto';q.style.height=Math.min(q.scr
 function trimite(){var t=$('q').value.trim();if(!t||S.merge)return;$('q').value='';auto();adauga('u',t);S.trimisLocal=true;lucreaza(true);
   run('apiTrimite',[S.sid,t],function(r){if(!S.sid)S.sid=r.sid;S.err=0;setTimeout(sondaj,2500);},function(e){eroare(e);});}
 function sondaj(){if(!S.sid||!S.merge)return;run('apiProgres',[S.sid,S.cursor],function(r){S.err=0;randare(r.evenimente||[]);
-  if(r.gata){gata();if(r.cost!=null)activitate('cost conversație: '+Number(r.cost).toFixed(2)+' $');}else setTimeout(sondaj,2500);},
+  if(r.gata){gata();inchidePasi(r.cost);}else setTimeout(sondaj,2500);},
   function(e){S.err++;if(S.err>6)eroare(e);else setTimeout(sondaj,4000);});}
-function conversatieNoua(){if(S.merge)return;S={sid:null,cursor:null,vazut:{},merge:false,err:0,act:null};bunVenit();$('hist').classList.remove('on');marcheaza();}
+function conversatieNoua(){if(S.merge)return;S={sid:null,cursor:null,vazut:{},merge:false,err:0,act:null};bunVenit();$('side').classList.remove('on');marcheaza();$('q').focus();}
 function marcheaza(){$('hist').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-sid')===S.sid);});}
-function deschideConv(sid){if(S.merge)return;S={sid:sid,cursor:null,vazut:{},merge:false,err:0,act:null};$('msgs').innerHTML='';stare('Se încarcă conversația…');$('hist').classList.remove('on');marcheaza();
-  run('apiDeschide',[sid],function(r){stare(null);$('msgs').innerHTML='';randare(r.evenimente||[]);});}
+function deschideConv(sid){if(S.merge)return;S={sid:sid,cursor:null,vazut:{},merge:false,err:0,act:null};$('msgs').innerHTML='';stare('Se încarcă conversația…');marcheaza();
+  run('apiDeschide',[sid],function(r){stare(null);$('msgs').innerHTML='';randare(r.evenimente||[]);inchidePasi(null);if(innerWidth<900)$('side').classList.remove('on');});}
 function incarcaIstoric(){run('apiIstoric',[],function(l){$('hist').innerHTML=l.length?l.map(function(x){return '<button type="button" data-sid="'+esc(x.sid)+'">'+esc(x.titlu)+'<small>'+esc(x.la)+(x.cost?' · '+Number(x.cost.usd).toFixed(2)+' $':'')+'</small></button>';}).join(''):'<div class="empty-note" style="padding:10px">Încă nicio conversație.</div>';marcheaza();},function(){});}
 var COST=null;
-function incarcaCost(){run('apiCost',[],function(c){COST=c;$('costTxt').textContent='ZEUS luna asta: '+c.luna.toFixed(2)+' / '+c.plafon+' $';},function(){});}
+function incarcaCost(){run('apiCost',[],function(c){COST=c;$('costTxt').textContent='Costul ZEUS luna asta: '+c.luna.toFixed(2)+' / '+c.plafon+' $';},function(){});}
 
 /* ---------- modale ---------- */
 function profil(){$('mKicker').textContent='CONTUL TĂU';$('mTitle').textContent=EU.nume||'ZEUS';
@@ -410,7 +468,7 @@ $('q').addEventListener('input',auto);
 $('q').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();trimite();}});
 $('bStop').addEventListener('click',function(){if(S.sid)run('apiOpreste',[S.sid],function(){});});
 $('bNew').addEventListener('click',conversatieNoua);
-$('bHist').addEventListener('click',function(){$('hist').classList.toggle('on');});
+$('bHist').addEventListener('click',function(){$('side').classList.toggle('on');});
 $('bRefresh').addEventListener('click',function(){incarcaDash(true);});
 $('avatar').addEventListener('click',profil);
 $('bell').addEventListener('click',function(){location.hash='comanda';setTimeout(function(){document.querySelector('.priorities').scrollIntoView({behavior:'smooth'});},60);});

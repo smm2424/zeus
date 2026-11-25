@@ -584,7 +584,10 @@ document.addEventListener('click',function(e){
 $('heroForm').addEventListener('submit',function(e){e.preventDefault();var v=$('heroQ').value.trim();if(!v)return;$('heroQ').value='';deschideChat(v);});
 $('chatForm').addEventListener('submit',function(e){e.preventDefault();trimite();});
 $('q').addEventListener('input',auto);
-$('q').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();trimite();}});
+/* Pe telefon / tabletă (ecran tactil, fără tastatură fizică) Enter = rând nou; trimiterea e doar din buton. Pe calculator: Enter trimite, Shift+Enter rând nou. */
+var TACTIL=(function(){try{return matchMedia('(hover: none) and (pointer: coarse)').matches;}catch(e){return false;}})();
+if(TACTIL){$('q').setAttribute('enterkeyhint','enter');}
+$('q').addEventListener('keydown',function(e){if(e.key!=='Enter'||e.shiftKey||e.isComposing||e.keyCode===229)return;if(TACTIL)return;e.preventDefault();trimite();});
 $('bStop').addEventListener('click',function(){if(S.sid)run('apiOpreste',[S.sid],function(){});});
 $('bNew').addEventListener('click',conversatieNoua);
 $('bHist').addEventListener('click',function(){$('side').classList.toggle('on');});
